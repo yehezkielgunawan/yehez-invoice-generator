@@ -1,7 +1,8 @@
+import { Text } from "@chakra-ui/layout";
 import React from "react";
 
 const AdminPage = () => {
-  return <div>ADMIN YAYA</div>;
+  return <Text>Data user:</Text>;
 };
 
 export default AdminPage;

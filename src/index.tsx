@@ -1,6 +1,8 @@
 import { ColorModeScript } from "@chakra-ui/react";
+import { firebaseConfig } from "constants/firebaseConfig";
 import * as React from "react";
 import ReactDOM from "react-dom";
+import { FirebaseAppProvider } from "reactfire";
 
 import { App } from "./App";
 import reportWebVitals from "./reportWebVitals";
@@ -9,10 +11,11 @@ import * as serviceWorker from "./serviceWorker";
 ReactDOM.render(
   <React.StrictMode>
     <ColorModeScript />
-
-    <App />
+    <FirebaseAppProvider firebaseConfig={firebaseConfig}>
+      <App />
+    </FirebaseAppProvider>
   </React.StrictMode>,
-  document.getElementById("root")
+  document.getElementById("root"),
 );
 
 // If you want your app to work offline and load faster, you can change
