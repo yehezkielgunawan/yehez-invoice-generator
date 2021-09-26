@@ -142,6 +142,7 @@ const AdminPage = () => {
         <FormControl isRequired>
           <FormLabel>Username</FormLabel>
           <Input
+            name="name"
             type="string"
             placeholder="User display name"
             onChange={handleNameChange}
@@ -153,11 +154,16 @@ const AdminPage = () => {
         <FormControl isRequired>
           <FormLabel>Email</FormLabel>
           <Flex gridGap={2}>
-            <Select placeholder="Select Role" onChange={handleSelectChange}>
+            <Select
+              name="role"
+              placeholder="Select Role"
+              onChange={handleSelectChange}
+            >
               <option value="seller">Seller</option>
               <option value="buyer">Buyer</option>
             </Select>
             <Input
+              name="email"
               placeholder="User email"
               type="email"
               onChange={handleEmailChange}
@@ -167,12 +173,13 @@ const AdminPage = () => {
           <FormHelperText>
             {role &&
               email.length > 0 &&
-              `Your username will be ${role}_${email}`}
+              `Your username will be ${email}`}
           </FormHelperText>
         </FormControl>
         <FormControl isRequired>
           <FormLabel>Password</FormLabel>
           <Input
+            name="password"
             placeholder="Input Password here"
             type="password"
             onChange={handlePasswordChange}
@@ -184,6 +191,9 @@ const AdminPage = () => {
             isInvalid={password !== confirmPassword}
           />
           <FormHelperText>
+            The password must be minimum 5 characters or more.
+          </FormHelperText>
+          <FormHelperText>
             {password !== confirmPassword && "The password does not match."}
           </FormHelperText>
         </FormControl>
@@ -191,6 +201,13 @@ const AdminPage = () => {
           variant="outline"
           colorScheme="green"
           onClick={() => handleCreateNewUser()}
+          isDisabled={
+            !email ||
+            !role ||
+            name.length < 3 ||
+            password.length < 5 ||
+            password !== confirmPassword
+          }
         >
           Create New User
         </Button>
