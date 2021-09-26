@@ -9,8 +9,8 @@ import React, { KeyboardEventHandler, useState } from "react";
 import { useHistory } from "react-router";
 
 const LoginPage = () => {
-  const toast = useAppToast();
   const firebaseAuth = getAuth();
+  const toast = useAppToast();
   const history = useHistory();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
