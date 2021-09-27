@@ -111,7 +111,7 @@ const GenerateInvoice = ({ data, isOpen, onClose }: GenerateInoviceProps) => {
       status: "success",
       title: `Successfully to generate invoice for ${data.name}`,
     });
-    onClose();
+    handleModalClose();
   };
 
   const header = <Text>Generate Invoice</Text>;
@@ -123,7 +123,7 @@ const GenerateInvoice = ({ data, isOpen, onClose }: GenerateInoviceProps) => {
           type="string"
           name="custName"
           placeholder="Customer name"
-          defaultValue={custName}
+          defaultValue={data.name}
           onChange={handleCustNameChange}
         ></Input>
       </FormControl>
@@ -133,7 +133,7 @@ const GenerateInvoice = ({ data, isOpen, onClose }: GenerateInoviceProps) => {
           type="string"
           name="custEmail"
           placeholder="Customer email"
-          defaultValue={custEmail}
+          defaultValue={data.email}
           onChange={handleCustEmailChange}
         ></Input>
       </FormControl>

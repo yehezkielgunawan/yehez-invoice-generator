@@ -23,10 +23,7 @@ const PrivateRoute = ({
     <Route
       {...rest}
       render={(routeProps) =>
-        signInCheckResult?.signedIn === true &&
-        signInCheckResult?.user.email?.includes(
-          String(rest.path).replace("/", ""),
-        ) ? (
+        signInCheckResult?.signedIn === true ? (
           <RouteComponent {...routeProps} />
         ) : (
           <Redirect to="/login" />
