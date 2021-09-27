@@ -86,7 +86,7 @@ const SellerPage = () => {
         if (
           !usersData.some((user) => user.email === currentUser?.user?.email)
         ) {
-          deleteUser(currentUser?.user)
+          return await deleteUser(currentUser?.user)
             .then(() => {
               toast({
                 status: "warning",
