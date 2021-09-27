@@ -14,8 +14,8 @@ The live version can be accessed at [https://invoice-generator.yehezgun.com/](ht
 - You can open the live demo at [https://invoice-generator.yehezgun.com/](https://invoice-generator.yehezgun.com/)
 - The sample account credentials can be seen [here](https://drive.google.com/drive/folders/1lk3fs0uM7tdfYivVQKSuS2AuPtygSr-i?usp=sharing) (Sheet 2)
 - There are three types of accounts here. Those are **admin**, **seller**, and **buyer**.
-- You only can make and delete a user account with the **admin** account.
-- The **seller** account only can see the buyer list and generate the invoice.
+- You only can make and delete a user account with the **admin** account. You also can see the user List if you logged in as **admin**.
+- The **seller** account only can see the buyer list and generate the invoice by clicking the button in the table and fill open the modal form.
 - The **buyer** only see the invoice that has been made before.
 
 ### How to run it locally?
