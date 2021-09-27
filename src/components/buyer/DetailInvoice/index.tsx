@@ -3,6 +3,7 @@ import { Box, Flex, Text } from "@chakra-ui/layout";
 import { Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/table";
 import { InvoiceDataList } from "components/seller/types";
 import AppModal from "components/ui/modalDialog";
+import { thousandSeparator } from "functions/helpers/ThousandSeparator";
 import React from "react";
 
 type DetailInvoiceProps = {
@@ -24,8 +25,8 @@ const DetailInvoiceComponent = ({
           <Tr>
             <Th>Item Name</Th>
             <Th>Qty</Th>
-            <Th>Price</Th>
-            <Th>Amount</Th>
+            <Th>Price (in Rupiah)</Th>
+            <Th>Amount (in Rupiah)</Th>
           </Tr>
         </Thead>
         <Tbody>
@@ -34,8 +35,8 @@ const DetailInvoiceComponent = ({
               <Tr key={index}>
                 <Td>{invoiceData.itemName}</Td>
                 <Td>{invoiceData.quantity}</Td>
-                <Td>{invoiceData.price}</Td>
-                <Td>{invoiceData.amount}</Td>
+                <Td>{thousandSeparator(invoiceData.price)}</Td>
+                <Td>{thousandSeparator(invoiceData.amount)}</Td>
               </Tr>
             ))}
         </Tbody>

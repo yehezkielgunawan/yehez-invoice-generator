@@ -8,6 +8,7 @@ import { collection, orderBy, query } from "@firebase/firestore";
 import { FirebaseError } from "@firebase/util";
 import { useAppToast } from "components/ui/useAppToast";
 import { useDesktopWidthCheck } from "functions/helpers/DesktopWidthChecker";
+import { formatDate } from "functions/helpers/formatDate";
 import React, { useEffect, useState } from "react";
 import { FaSignOutAlt } from "react-icons/fa";
 import { useHistory } from "react-router";
@@ -140,7 +141,7 @@ const BuyerPage = () => {
                     <Td>{invoice.invoiceId}</Td>
                     <Td>{invoice.customerName}</Td>
                     <Td>{invoice.notes}</Td>
-                    <Td>{invoice.madeOn}</Td>
+                    <Td>{formatDate(invoice.madeOn)}</Td>
                     <Td>{invoice.madeBy}</Td>
                     <Td>
                       <Button onClick={() => handleOpenModal(index)}>

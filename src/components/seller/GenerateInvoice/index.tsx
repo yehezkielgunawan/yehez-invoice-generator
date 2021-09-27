@@ -18,6 +18,7 @@ import { getAuth } from "@firebase/auth";
 import { doc, setDoc } from "@firebase/firestore";
 import AppModal from "components/ui/modalDialog";
 import { useAppToast } from "components/ui/useAppToast";
+import { thousandSeparator } from "functions/helpers/ThousandSeparator";
 import React, { useEffect, useState } from "react";
 import { useFirestore } from "reactfire";
 
@@ -183,8 +184,8 @@ const GenerateInvoice = ({ data, isOpen, onClose }: GenerateInoviceProps) => {
                 <Tr>
                   <Th>Item Name</Th>
                   <Th>Qty</Th>
-                  <Th>Price</Th>
-                  <Th>Amount</Th>
+                  <Th>Price (Rp)</Th>
+                  <Th>Amount (Rp)</Th>
                 </Tr>
               </Thead>
               <Tbody>
@@ -193,8 +194,8 @@ const GenerateInvoice = ({ data, isOpen, onClose }: GenerateInoviceProps) => {
                     <Tr key={index}>
                       <Td>{invoiceData.itemName}</Td>
                       <Td>{invoiceData.quantity}</Td>
-                      <Td>{invoiceData.price}</Td>
-                      <Td>{invoiceData.amount}</Td>
+                      <Td>{thousandSeparator(invoiceData.price)}</Td>
+                      <Td>{thousandSeparator(invoiceData.amount)}</Td>
                     </Tr>
                   ))}
               </Tbody>
