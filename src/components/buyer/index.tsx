@@ -80,7 +80,7 @@ const BuyerPage = () => {
         }
       });
     }
-  }, [currentUser]);
+  }, []);
 
   useEffect(() => {
     if (currentUser) {
@@ -101,7 +101,7 @@ const BuyerPage = () => {
           });
       }
     }
-  }, [currentUser]);
+  }, []);
 
   if (invoiceStatus === "loading") {
     return <Spinner />;
@@ -144,7 +144,7 @@ const BuyerPage = () => {
             <DetailInvoiceComponent
               isOpen={isOpen}
               onClose={onClose}
-              data={selectedInvoiceForModal.invoiceContent}
+              data={selectedInvoiceForModal?.invoiceContent}
             />
           </Tbody>
         </Table>

@@ -75,7 +75,7 @@ const SellerPage = () => {
         }
       });
     }
-  }, [currentUser]);
+  }, []);
 
   useEffect(() => {
     if (currentUser) {
@@ -96,7 +96,7 @@ const SellerPage = () => {
           });
       }
     }
-  }, [currentUser]);
+  }, []);
 
   if (status === "loading") {
     return <Spinner />;
@@ -120,7 +120,7 @@ const SellerPage = () => {
             </Tr>
           </Thead>
           <Tbody>
-            {users.map(
+            {usersData.map(
               (user, index) =>
                 user.email.includes("buyer") && (
                   <Tr key={index}>
@@ -149,6 +149,11 @@ const SellerPage = () => {
             />
           </Tbody>
         </Table>
+        {usersData?.length === 0 && (
+          <Text textAlign="center" my={2}>
+            No user list for now.
+          </Text>
+        )}
       </Box>
       <Button
         colorScheme="orange"
