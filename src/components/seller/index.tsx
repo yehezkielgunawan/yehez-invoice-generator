@@ -73,25 +73,30 @@ const SellerPage = () => {
               });
             });
         }
-        if (!usersData.some((user) => user.email === currentUser.email)) {
-          return await deleteUser(currentUser)
-            .then(() => {
-              toast({
-                status: "warning",
-                title: "Account has deleted before!",
-              });
-              return history.push("/");
-            })
-            .catch((error: FirebaseError) => {
-              return toast({
-                status: "error",
-                title: error.message,
-              });
-            });
-        }
       });
     }
-  }, []);
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (currentUser) {
+      if (!usersData.some((user) => user.email === currentUser.email)) {
+        deleteUser(currentUser)
+          .then(() => {
+            toast({
+              status: "warning",
+              title: "Account has deleted before!",
+            });
+            return history.push("/");
+          })
+          .catch((error: FirebaseError) => {
+            return toast({
+              status: "error",
+              title: error.message,
+            });
+          });
+      }
+    }
+  }, [currentUser]);
 
   if (status === "loading") {
     return <Spinner />;
