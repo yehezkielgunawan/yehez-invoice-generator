@@ -14,6 +14,7 @@ import {
   Thead,
   Tr,
 } from "@chakra-ui/react";
+import { getAuth } from "@firebase/auth";
 import { doc, setDoc } from "@firebase/firestore";
 import AppModal from "components/ui/modalDialog";
 import { useAppToast } from "components/ui/useAppToast";
@@ -31,12 +32,23 @@ type GenerateInoviceProps = {
 const GenerateInvoice = ({ data, isOpen, onClose }: GenerateInoviceProps) => {
   const firestore = useFirestore();
   const toast = useAppToast();
+  const firebaseAuth = getAuth();
+  const currentUser = firebaseAuth.currentUser;
   const [invoiceDatas, setInvoiceDatas] = useState<InvoiceDataList>([]);
+  const [custName, setCustName] = useState<string>("");
+  const [custEmail, setCustEmail] = useState<string>("");
   const [tempNotes, setTempNotes] = useState<string>("");
   const [tempItemName, setTempItemname] = useState<string>("");
   const [tempItemQty, setTempItemQty] = useState<number>(0);
   const [tempItemPrice, setTempItemPrice] = useState<number>(0);
   const [tempItemAmount, setTempItemAmount] = useState<number>(0);
+
+  const handleCustNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    return setCustName(e.target.value);
+  };
+  const handleCustEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    return setCustEmail(e.target.value);
+  };
 
   const handleItemNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     return setTempItemname(e.target.value);
@@ -91,6 +103,7 @@ const GenerateInvoice = ({ data, isOpen, onClose }: GenerateInoviceProps) => {
         notes: tempNotes.length > 0 ? tempNotes : "",
         madeOn: new Date().toUTCString(),
         invoiceContent: invoiceDatas,
+        madeBy: currentUser?.displayName,
       },
     );
     toast({
@@ -109,7 +122,8 @@ const GenerateInvoice = ({ data, isOpen, onClose }: GenerateInoviceProps) => {
           type="string"
           name="custName"
           placeholder="Customer name"
-          defaultValue={data.name}
+          defaultValue={custName}
+          onChange={handleCustNameChange}
         ></Input>
       </FormControl>
       <FormControl isRequired>
@@ -118,7 +132,8 @@ const GenerateInvoice = ({ data, isOpen, onClose }: GenerateInoviceProps) => {
           type="string"
           name="custEmail"
           placeholder="Customer email"
-          defaultValue={data.email}
+          defaultValue={custEmail}
+          onChange={handleCustEmailChange}
         ></Input>
       </FormControl>
       <FormControl>
@@ -198,7 +213,9 @@ const GenerateInvoice = ({ data, isOpen, onClose }: GenerateInoviceProps) => {
       </Button>
       <Button
         colorScheme="teal"
-        isDisabled={invoiceDatas.length < 1}
+        isDisabled={
+          invoiceDatas.length < 1 || custEmail.length < 5 || custName.length < 3
+        }
         onClick={() => handleSubmitInvoice()}
       >
         Submit
@@ -208,6 +225,8 @@ const GenerateInvoice = ({ data, isOpen, onClose }: GenerateInoviceProps) => {
 
   useEffect(() => {
     setInvoiceDatas([]);
+    setCustEmail(data.email);
+    setCustName(data.name);
   }, []);
 
   return (

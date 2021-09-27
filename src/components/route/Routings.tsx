@@ -1,3 +1,4 @@
+import { Spinner } from "@chakra-ui/spinner";
 import React from "react";
 import { Redirect, Route, Switch } from "react-router";
 import { useSigninCheck } from "reactfire";
@@ -6,7 +7,11 @@ import { privateRoutes, restrictedRoutes } from "routes";
 import PrivateRoute from "./PrivateRoute";
 
 const Routings = () => {
-  const { data: signInCheckResult } = useSigninCheck();
+  const { status, data: signInCheckResult } = useSigninCheck();
+
+  if (status === "loading") {
+    return <Spinner />;
+  }
   return (
     <Switch>
       {restrictedRoutes.map((restrictedRoute) => (
@@ -26,7 +31,7 @@ const Routings = () => {
         />
       ))}
       <Route exact path="/">
-        {signInCheckResult?.signedIn ? (
+        {signInCheckResult?.signedIn === true ? (
           signInCheckResult?.user.email?.includes("admin") ? (
             <Redirect to="/admin" />
           ) : signInCheckResult?.user.email?.includes("seller") ? (

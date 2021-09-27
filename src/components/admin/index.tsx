@@ -183,6 +183,7 @@ const AdminPage = () => {
             onChange={handlePasswordChange}
           />
           <Input
+            name="confirmPassword"
             placeholder="Confirm Password"
             type="password"
             onChange={handleConfirmPasswordChange}

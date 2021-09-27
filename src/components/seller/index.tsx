@@ -11,7 +11,11 @@ import { useDesktopWidthCheck } from "functions/helpers/DesktopWidthChecker";
 import React, { useEffect, useState } from "react";
 import { FaFileInvoice, FaSignOutAlt } from "react-icons/fa";
 import { useHistory } from "react-router";
-import { useFirestore, useFirestoreCollectionData } from "reactfire";
+import {
+  useFirestore,
+  useFirestoreCollectionData,
+  useSigninCheck,
+} from "reactfire";
 
 import GenerateInvoice from "./GenerateInvoice";
 
@@ -21,12 +25,13 @@ const SellerPage = () => {
   const [selectedUserIndex, setSelectedUserIndex] = useState<number>(0);
   const toast = useAppToast();
   const history = useHistory();
-  const firestore = useFirestore();
   const firebaseAuth = getAuth();
-  const currentUser = firebaseAuth.currentUser;
+  const firestore = useFirestore();
+  const { status: SignInStatus, data: currentUser } = useSigninCheck();
   const usersCollection = collection(firestore, "users");
   const usersQuery = query(usersCollection, orderBy("name", "asc"));
-  const { status, data: users } = useFirestoreCollectionData(usersQuery);
+  const { status: userStatus, data: users } =
+    useFirestoreCollectionData(usersQuery);
   const usersData = users ?? [];
   const selectedUserForModal = usersData.map((user) => user).flat()[
     selectedUserIndex
@@ -56,10 +61,15 @@ const SellerPage = () => {
   };
 
   useEffect(() => {
-    if (currentUser) {
+    if (currentUser?.signedIn === true) {
       usersData.map(async (user) => {
-        if (user.email === currentUser.email && !currentUser.displayName) {
-          return await updateProfile(currentUser, { displayName: user.name })
+        if (
+          user.email === currentUser?.user.email &&
+          !currentUser?.user.displayName
+        ) {
+          return await updateProfile(currentUser?.user, {
+            displayName: user.name,
+          })
             .then(() => {
               toast({
                 status: "success",
@@ -73,39 +83,38 @@ const SellerPage = () => {
               });
             });
         }
+        if (
+          !usersData.some((user) => user.email === currentUser?.user?.email)
+        ) {
+          deleteUser(currentUser?.user)
+            .then(() => {
+              toast({
+                status: "warning",
+                title: "Account has deleted before!",
+              });
+              return history.push("/");
+            })
+            .catch((error: FirebaseError) => {
+              return toast({
+                status: "error",
+                title: error.message,
+              });
+            });
+        }
       });
     }
   }, []);
 
-  useEffect(() => {
-    if (currentUser) {
-      if (!usersData.some((user) => user.email === currentUser.email)) {
-        deleteUser(currentUser)
-          .then(() => {
-            toast({
-              status: "warning",
-              title: "Account has deleted before!",
-            });
-            return history.push("/");
-          })
-          .catch((error: FirebaseError) => {
-            return toast({
-              status: "error",
-              title: error.message,
-            });
-          });
-      }
-    }
-  }, []);
-
-  if (status === "loading") {
+  if (userStatus === "loading" && SignInStatus === "loading") {
     return <Spinner />;
   }
 
   return (
     <Stack spacing={3}>
       <Text fontSize="xl">
-        {currentUser?.displayName ? `Welcome ${currentUser.displayName}!` : ``}
+        {currentUser?.user?.displayName
+          ? `Welcome ${currentUser?.user.displayName}!`
+          : ``}
       </Text>
       <Text fontSize="lg">
         <b>Buyer List</b>
@@ -143,8 +152,8 @@ const SellerPage = () => {
               isOpen={isOpen}
               onClose={onClose}
               data={{
-                name: selectedUserForModal.name,
-                email: selectedUserForModal.email,
+                name: selectedUserForModal?.name,
+                email: selectedUserForModal?.email,
               }}
             />
           </Tbody>

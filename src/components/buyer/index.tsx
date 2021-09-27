@@ -11,7 +11,11 @@ import { useDesktopWidthCheck } from "functions/helpers/DesktopWidthChecker";
 import React, { useEffect, useState } from "react";
 import { FaSignOutAlt } from "react-icons/fa";
 import { useHistory } from "react-router";
-import { useFirestore, useFirestoreCollectionData } from "reactfire";
+import {
+  useFirestore,
+  useFirestoreCollectionData,
+  useSigninCheck,
+} from "reactfire";
 
 import DetailInvoiceComponent from "./DetailInvoice";
 
@@ -22,8 +26,8 @@ const BuyerPage = () => {
   const history = useHistory();
   const firestore = useFirestore();
   const firebaseAuth = getAuth();
+  const { status: signInStatus, data: currentUser } = useSigninCheck();
   const [selectedInvoiceIndex, setSelectedInvoiceIndex] = useState<number>(0);
-  const currentUser = firebaseAuth.currentUser;
   const invoiceCollection = collection(firestore, "invoices");
   const invoiceQuery = query(invoiceCollection, orderBy("madeOn", "asc"));
   const { status: invoiceStatus, data: invoiceList } =
@@ -61,10 +65,15 @@ const BuyerPage = () => {
   };
 
   useEffect(() => {
-    if (currentUser) {
+    if (currentUser?.signedIn === true) {
       usersData.map(async (user) => {
-        if (user.email === currentUser.email && !currentUser.displayName) {
-          return await updateProfile(currentUser, { displayName: user.name })
+        if (
+          user.email === currentUser?.user.email &&
+          !currentUser?.user.displayName
+        ) {
+          return await updateProfile(currentUser?.user, {
+            displayName: user.name,
+          })
             .then(() => {
               toast({
                 status: "success",
@@ -78,39 +87,38 @@ const BuyerPage = () => {
               });
             });
         }
+        if (
+          !usersData.some((user) => user.email === currentUser?.user?.email)
+        ) {
+          deleteUser(currentUser?.user)
+            .then(() => {
+              toast({
+                status: "warning",
+                title: "Account has deleted before!",
+              });
+              return history.push("/");
+            })
+            .catch((error: FirebaseError) => {
+              return toast({
+                status: "error",
+                title: error.message,
+              });
+            });
+        }
       });
     }
   }, []);
 
-  useEffect(() => {
-    if (currentUser) {
-      if (!usersData.some((user) => user.email === currentUser.email)) {
-        deleteUser(currentUser)
-          .then(() => {
-            toast({
-              status: "warning",
-              title: "Account has deleted before!",
-            });
-            return history.push("/");
-          })
-          .catch((error: FirebaseError) => {
-            return toast({
-              status: "error",
-              title: error.message,
-            });
-          });
-      }
-    }
-  }, []);
-
-  if (invoiceStatus === "loading") {
+  if (invoiceStatus === "loading" && signInStatus === "loading") {
     return <Spinner />;
   }
 
   return (
     <Stack spacing={3}>
       <Text fontSize="lg">
-        {currentUser?.displayName ? `Hello, ${currentUser.displayName}` : ""}
+        {currentUser?.user?.displayName
+          ? `Hello, ${currentUser?.user.displayName}`
+          : ""}
       </Text>
       <Box overflowX={isDesktopWidth ? "auto" : "scroll"}>
         <Table size="sm">
@@ -120,18 +128,20 @@ const BuyerPage = () => {
               <Th>Customer / Buyer's Name</Th>
               <Th>Notes</Th>
               <Th>Made On</Th>
+              <Th>Made By</Th>
               <Th></Th>
             </Tr>
           </Thead>
           <Tbody>
             {invoiceDataList.map((invoice, index) => {
               return (
-                invoice.customerEmail.includes(currentUser?.email) && (
+                invoice.customerEmail.includes(currentUser?.user?.email) && (
                   <Tr key={index}>
                     <Td>{invoice.invoiceId}</Td>
                     <Td>{invoice.customerName}</Td>
                     <Td>{invoice.notes}</Td>
                     <Td>{invoice.madeOn}</Td>
+                    <Td>{invoice.madeBy}</Td>
                     <Td>
                       <Button onClick={() => handleOpenModal(index)}>
                         See Detail Invoice
