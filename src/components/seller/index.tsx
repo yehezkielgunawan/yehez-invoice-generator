@@ -1,19 +1,97 @@
 import { Button } from "@chakra-ui/button";
+import { useDisclosure } from "@chakra-ui/hooks";
 import { Box, Stack, Text } from "@chakra-ui/layout";
 import { Spinner } from "@chakra-ui/spinner";
 import { Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/table";
+import { deleteUser, getAuth, updateProfile } from "@firebase/auth";
 import { collection, orderBy, query } from "@firebase/firestore";
+import { FirebaseError } from "@firebase/util";
+import { useAppToast } from "components/ui/useAppToast";
 import { useDesktopWidthCheck } from "functions/helpers/DesktopWidthChecker";
-import React from "react";
-import { FaFileInvoice } from "react-icons/fa";
+import React, { useEffect, useState } from "react";
+import { FaFileInvoice, FaSignOutAlt } from "react-icons/fa";
+import { useHistory } from "react-router";
 import { useFirestore, useFirestoreCollectionData } from "reactfire";
+
+import GenerateInvoice from "./GenerateInvoice";
 
 const SellerPage = () => {
   const isDesktopWidth = useDesktopWidthCheck();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [selectedUserIndex, setSelectedUserIndex] = useState<number>(0);
+  const toast = useAppToast();
+  const history = useHistory();
   const firestore = useFirestore();
+  const firebaseAuth = getAuth();
+  const currentUser = firebaseAuth.currentUser;
   const usersCollection = collection(firestore, "users");
   const usersQuery = query(usersCollection, orderBy("name", "asc"));
   const { status, data: users } = useFirestoreCollectionData(usersQuery);
+  const usersData = users ?? [];
+  const selectedUserForModal = usersData.map((user) => user).flat()[
+    selectedUserIndex
+  ];
+
+  const handleLogoutFirebase = async () => {
+    return await firebaseAuth
+      .signOut()
+      .then(() => {
+        toast({
+          status: "success",
+          title: "Successfully logout",
+        });
+        history.push("/");
+      })
+      .catch((error: FirebaseError) => {
+        toast({
+          status: "error",
+          title: error.message,
+        });
+      });
+  };
+
+  const handleOpenModal = (selectedUserIndexNum: number) => {
+    setSelectedUserIndex(selectedUserIndexNum);
+    onOpen();
+  };
+
+  useEffect(() => {
+    if (currentUser) {
+      usersData.map(async (user) => {
+        if (user.email === currentUser.email && !currentUser.displayName) {
+          return await updateProfile(currentUser, { displayName: user.name })
+            .then(() => {
+              toast({
+                status: "success",
+                title: `Welcome ${user.name}`,
+              });
+            })
+            .catch((error: FirebaseError) => {
+              toast({
+                status: "error",
+                title: error.message,
+              });
+            });
+        }
+        if (!usersData.some((user) => user.email === currentUser.email)) {
+          return await deleteUser(currentUser)
+            .then(() => {
+              toast({
+                status: "warning",
+                title: "Account has deleted before!",
+              });
+              return history.push("/");
+            })
+            .catch((error: FirebaseError) => {
+              return toast({
+                status: "error",
+                title: error.message,
+              });
+            });
+        }
+      });
+    }
+  }, []);
 
   if (status === "loading") {
     return <Spinner />;
@@ -21,6 +99,9 @@ const SellerPage = () => {
 
   return (
     <Stack spacing={3}>
+      <Text fontSize="xl">
+        {currentUser?.displayName ? `Welcome ${currentUser.displayName}!` : ``}
+      </Text>
       <Text fontSize="lg">
         <b>Buyer List</b>
       </Text>
@@ -45,6 +126,7 @@ const SellerPage = () => {
                         variant="solid"
                         colorScheme="teal"
                         leftIcon={<FaFileInvoice />}
+                        onClick={() => handleOpenModal(index)}
                       >
                         Generate Invoice
                       </Button>
@@ -52,9 +134,24 @@ const SellerPage = () => {
                   </Tr>
                 ),
             )}
+            <GenerateInvoice
+              isOpen={isOpen}
+              onClose={onClose}
+              data={{
+                name: selectedUserForModal.name,
+                email: selectedUserForModal.email,
+              }}
+            />
           </Tbody>
         </Table>
       </Box>
+      <Button
+        colorScheme="orange"
+        leftIcon={<FaSignOutAlt />}
+        onClick={() => handleLogoutFirebase()}
+      >
+        LOGOUT
+      </Button>
     </Stack>
   );
 };

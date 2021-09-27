@@ -1,0 +1,228 @@
+import {
+  Box,
+  Button,
+  Flex,
+  FormControl,
+  FormLabel,
+  Input,
+  Stack,
+  Table,
+  Tbody,
+  Td,
+  Text,
+  Th,
+  Thead,
+  Tr,
+} from "@chakra-ui/react";
+import { doc, setDoc } from "@firebase/firestore";
+import AppModal from "components/ui/modalDialog";
+import { useAppToast } from "components/ui/useAppToast";
+import React, { useEffect, useState } from "react";
+import { useFirestore } from "reactfire";
+
+import { InvoiceDataList, User } from "../types";
+
+type GenerateInoviceProps = {
+  data: User;
+  isOpen: boolean;
+  onClose: () => void;
+};
+
+const GenerateInvoice = ({ data, isOpen, onClose }: GenerateInoviceProps) => {
+  const firestore = useFirestore();
+  const toast = useAppToast();
+  const [invoiceDatas, setInvoiceDatas] = useState<InvoiceDataList>([]);
+  const [tempNotes, setTempNotes] = useState<string>("");
+  const [tempItemName, setTempItemname] = useState<string>("");
+  const [tempItemQty, setTempItemQty] = useState<number>(0);
+  const [tempItemPrice, setTempItemPrice] = useState<number>(0);
+  const [tempItemAmount, setTempItemAmount] = useState<number>(0);
+
+  const handleItemNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    return setTempItemname(e.target.value);
+  };
+  const handleItemQtyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTempItemQty(Number(e.target.value));
+    setTempItemAmount(Number(e.target.value) * tempItemPrice);
+  };
+  const handleItemPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTempItemPrice(Number(e.target.value));
+    setTempItemAmount(Number(e.target.value) * tempItemQty);
+  };
+
+  const handleAddItem = () => {
+    setInvoiceDatas([
+      ...invoiceDatas,
+      {
+        itemName: tempItemName,
+        quantity: tempItemQty,
+        price: tempItemPrice,
+        amount: tempItemAmount,
+      },
+    ]);
+  };
+
+  const handleModalClose = () => {
+    setInvoiceDatas([]);
+    setTempItemname("");
+    setTempItemQty(0);
+    setTempItemPrice(0);
+    setTempItemAmount(0);
+    onClose();
+  };
+
+  const handleNotesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    return setTempNotes(e.target.value);
+  };
+
+  const handleSubmitInvoice = async () => {
+    await setDoc(
+      doc(
+        firestore,
+        "invoices",
+        `${data.name}_${Math.floor(Math.random() * 100 + 1)}`,
+      ),
+      {
+        customerEmail: data.email,
+        customerName: data.name,
+        invoiceId: `invoice_${data.name}_${Math.floor(
+          Math.random() * 100 + 1,
+        )}`,
+        notes: tempNotes.length > 0 ? tempNotes : "",
+        madeOn: new Date().toUTCString(),
+        invoiceContent: invoiceDatas,
+      },
+    );
+    toast({
+      status: "success",
+      title: `Successfully to generate invoice for ${data.name}`,
+    });
+    onClose();
+  };
+
+  const header = <Text>Generate Invoice</Text>;
+  const modalBody = (
+    <Stack spacing={2}>
+      <FormControl isRequired>
+        <FormLabel>Customer's Name</FormLabel>
+        <Input
+          type="string"
+          name="custName"
+          placeholder="Customer name"
+          value={data.name}
+          readOnly
+        ></Input>
+      </FormControl>
+      <FormControl isRequired>
+        <FormLabel>Customer's Email</FormLabel>
+        <Input
+          type="string"
+          name="custEmail"
+          placeholder="Customer email"
+          value={data.email}
+          readOnly
+        ></Input>
+      </FormControl>
+      <FormControl>
+        <FormLabel>Notes</FormLabel>
+        <Input
+          type="string"
+          name="notes"
+          onChange={handleNotesChange}
+          placeholder="Notes"
+        ></Input>
+      </FormControl>
+      <FormControl isRequired>
+        <FormLabel>Item Data</FormLabel>
+        <Flex gridGap={2} align="center">
+          <Input
+            type="string"
+            placeholder="Item's name"
+            onChange={handleItemNameChange}
+          />
+          <Input
+            type="number"
+            placeholder="Qty"
+            onChange={handleItemQtyChange}
+          />
+          <Input
+            type="number"
+            placeholder="Price"
+            onChange={handleItemPriceChange}
+          />
+          <Input
+            type="number"
+            placeholder="Amount"
+            value={tempItemAmount > 0 ? tempItemAmount : ""}
+          />
+        </Flex>
+        <Button
+          colorScheme="blue"
+          isDisabled={tempItemAmount < 1}
+          onClick={() => handleAddItem()}
+        >
+          Add
+        </Button>
+        {invoiceDatas.length > 0 ? (
+          <Box overflowX="scroll">
+            <Table>
+              <Thead>
+                <Tr>
+                  <Th>Item Name</Th>
+                  <Th>Qty</Th>
+                  <Th>Price</Th>
+                  <Th>Amount</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {invoiceDatas.length > 0 &&
+                  invoiceDatas.map((invoiceData, index) => (
+                    <Tr key={index}>
+                      <Td>{invoiceData.itemName}</Td>
+                      <Td>{invoiceData.quantity}</Td>
+                      <Td>{invoiceData.price}</Td>
+                      <Td>{invoiceData.amount}</Td>
+                    </Tr>
+                  ))}
+              </Tbody>
+            </Table>
+          </Box>
+        ) : (
+          <Text textAlign="center">No Item Data</Text>
+        )}
+      </FormControl>
+    </Stack>
+  );
+  const confirmButton = (
+    <Flex marginLeft="auto" gridGap={2}>
+      <Button variant="outline" onClick={() => handleModalClose()}>
+        Cancel
+      </Button>
+      <Button
+        colorScheme="teal"
+        isDisabled={invoiceDatas.length < 1}
+        onClick={() => handleSubmitInvoice()}
+      >
+        Submit
+      </Button>
+    </Flex>
+  );
+
+  useEffect(() => {
+    setInvoiceDatas([]);
+  }, []);
+
+  return (
+    <AppModal
+      isOpen={isOpen}
+      onClose={onClose}
+      size="lg"
+      body={modalBody}
+      header={header}
+      withFooter
+      confirmButton={confirmButton}
+    />
+  );
+};
+
+export default GenerateInvoice;

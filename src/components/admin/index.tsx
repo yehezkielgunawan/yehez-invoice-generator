@@ -171,9 +171,7 @@ const AdminPage = () => {
           </Flex>
           <FormHelperText>{!role && "Please select the role!"}</FormHelperText>
           <FormHelperText>
-            {role &&
-              email.length > 0 &&
-              `Your username will be ${email}`}
+            {role && email.length > 0 && `Your username will be ${email}`}
           </FormHelperText>
         </FormControl>
         <FormControl isRequired>
