@@ -110,7 +110,6 @@ const GenerateInvoice = ({ data, isOpen, onClose }: GenerateInoviceProps) => {
           name="custName"
           placeholder="Customer name"
           defaultValue={data.name}
-          readOnly
         ></Input>
       </FormControl>
       <FormControl isRequired>
@@ -120,7 +119,6 @@ const GenerateInvoice = ({ data, isOpen, onClose }: GenerateInoviceProps) => {
           name="custEmail"
           placeholder="Customer email"
           defaultValue={data.email}
-          readOnly
         ></Input>
       </FormControl>
       <FormControl>
