@@ -1,4 +1,5 @@
 import { Button } from "@chakra-ui/button";
+import { useDisclosure } from "@chakra-ui/hooks";
 import { Box, Stack, Text } from "@chakra-ui/layout";
 import { Spinner } from "@chakra-ui/spinner";
 import { Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/table";
@@ -7,17 +8,21 @@ import { collection, orderBy, query } from "@firebase/firestore";
 import { FirebaseError } from "@firebase/util";
 import { useAppToast } from "components/ui/useAppToast";
 import { useDesktopWidthCheck } from "functions/helpers/DesktopWidthChecker";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { FaSignOutAlt } from "react-icons/fa";
 import { useHistory } from "react-router";
 import { useFirestore, useFirestoreCollectionData } from "reactfire";
 
+import DetailInvoiceComponent from "./DetailInvoice";
+
 const BuyerPage = () => {
   const isDesktopWidth = useDesktopWidthCheck();
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useAppToast();
   const history = useHistory();
   const firestore = useFirestore();
   const firebaseAuth = getAuth();
+  const [selectedInvoiceIndex, setSelectedInvoiceIndex] = useState<number>(0);
   const currentUser = firebaseAuth.currentUser;
   const invoiceCollection = collection(firestore, "invoices");
   const invoiceQuery = query(invoiceCollection, orderBy("madeOn", "asc"));
@@ -28,6 +33,14 @@ const BuyerPage = () => {
   const { data: users } = useFirestoreCollectionData(usersQuery);
   const usersData = users ?? [];
   const invoiceDataList = invoiceList ?? [];
+  const selectedInvoiceForModal = invoiceDataList
+    .map((invoice) => invoice)
+    .flat()[selectedInvoiceIndex];
+
+  const handleOpenModal = (selectedInvoiceIndexNum: number) => {
+    setSelectedInvoiceIndex(selectedInvoiceIndexNum);
+    onOpen();
+  };
 
   const handleLogoutFirebase = async () => {
     return await firebaseAuth
@@ -112,16 +125,27 @@ const BuyerPage = () => {
           </Thead>
           <Tbody>
             {invoiceDataList.map((invoice, index) => {
-              return invoice.customerEmail.includes(currentUser?.email) && (
-                <Tr key={index}>
-                  <Td>{invoice.invoiceId}</Td>
-                  <Td>{invoice.customerName}</Td>
-                  <Td>{invoice.notes}</Td>
-                  <Td>{invoice.madeOn}</Td>
-                  <Td><Button>See Detail Invoice</Button></Td>
-                </Tr>
+              return (
+                invoice.customerEmail.includes(currentUser?.email) && (
+                  <Tr key={index}>
+                    <Td>{invoice.invoiceId}</Td>
+                    <Td>{invoice.customerName}</Td>
+                    <Td>{invoice.notes}</Td>
+                    <Td>{invoice.madeOn}</Td>
+                    <Td>
+                      <Button onClick={() => handleOpenModal(index)}>
+                        See Detail Invoice
+                      </Button>
+                    </Td>
+                  </Tr>
+                )
               );
             })}
+            <DetailInvoiceComponent
+              isOpen={isOpen}
+              onClose={onClose}
+              data={selectedInvoiceForModal.invoiceContent}
+            />
           </Tbody>
         </Table>
       </Box>
