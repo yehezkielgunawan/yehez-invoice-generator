@@ -148,6 +148,11 @@ const BuyerPage = () => {
             />
           </Tbody>
         </Table>
+        {invoiceDataList?.length === 0 && (
+          <Text align="center" marginY={2}>
+            No Invoice here!
+          </Text>
+        )}
       </Box>
       <Button
         colorScheme="orange"

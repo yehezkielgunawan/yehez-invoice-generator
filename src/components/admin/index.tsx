@@ -238,6 +238,11 @@ const AdminPage = () => {
             ))}
           </Tbody>
         </Table>
+        {users?.length === 0 && (
+          <Text textAlign="center" my={2}>
+            There is no user list here! Please generate the user list first!
+          </Text>
+        )}
       </Box>
       <Button
         colorScheme="orange"
