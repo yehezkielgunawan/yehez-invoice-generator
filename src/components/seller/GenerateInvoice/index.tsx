@@ -109,7 +109,7 @@ const GenerateInvoice = ({ data, isOpen, onClose }: GenerateInoviceProps) => {
           type="string"
           name="custName"
           placeholder="Customer name"
-          value={data.name}
+          defaultValue={data.name}
           readOnly
         ></Input>
       </FormControl>
@@ -119,7 +119,7 @@ const GenerateInvoice = ({ data, isOpen, onClose }: GenerateInoviceProps) => {
           type="string"
           name="custEmail"
           placeholder="Customer email"
-          value={data.email}
+          defaultValue={data.email}
           readOnly
         ></Input>
       </FormControl>
@@ -153,7 +153,7 @@ const GenerateInvoice = ({ data, isOpen, onClose }: GenerateInoviceProps) => {
           <Input
             type="number"
             placeholder="Amount"
-            value={tempItemAmount > 0 ? tempItemAmount : ""}
+            defaultValue={tempItemAmount > 0 ? tempItemAmount : ""}
           />
         </Flex>
         <Button
