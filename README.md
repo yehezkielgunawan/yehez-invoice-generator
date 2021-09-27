@@ -31,3 +31,4 @@ The live version can be accessed at [https://invoice-generator.yehezgun.com/](ht
 - I didn't use Redux because I think Firebase and [React Fire](https://github.com/FirebaseExtended/reactfire) has the built-in context provider, so I can use it and call it at many components that I need.
 - The firebase config can be seen at `src\constants\firebaseConfig.ts`
 - For the user role validation, because Firebase don't have the built-in role authentication, so I decided to make a manual validation. If the email contains the word of `seller`, the role is a seller and when logged in, it will redirect to the seller page, and so the buyer account.
+- Let me know if there's some feedback for this project.
