@@ -1,3 +1,4 @@
+import { Spinner } from "@chakra-ui/spinner";
 import React from "react";
 import { Redirect, Route, RouteComponentProps, RouteProps } from "react-router";
 import { useSigninCheck } from "reactfire";
@@ -12,12 +13,17 @@ const PrivateRoute = ({
   component: RouteComponent,
   ...rest
 }: PrivateRouteProps) => {
-  const { data: signInCheckResult } = useSigninCheck();
+  const { status, data: signInCheckResult } = useSigninCheck();
+
+  if (status === "loading") {
+    return <Spinner />;
+  }
+
   return (
     <Route
       {...rest}
       render={(routeProps) =>
-        signInCheckResult?.signedIn ? (
+        signInCheckResult?.signedIn === true ? (
           <RouteComponent {...routeProps} />
         ) : (
           <Redirect to="/login" />
